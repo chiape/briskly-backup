@@ -1,24 +1,33 @@
 #!/bin/bash
 
-CWD=$(pwd -P)
-
+CWD=$(pwd -P)  
 echo "You are in" $CWD
-
-DirPath="$(basename $CWD)"
+DirPath="$(basename $CWD)" 
 echo $DirPath
-read -p "Do you want to backup the folder above (y/N)?" reply
+read -p "Do you want to backup the folder above (y/N)? " reply
+echo "you typed:" $reply 
 
-echo "you typed" : $reply 
+if [ "$reply" == "y" ] || [ "$reply" == "Y" ]; then
+    TIME=$(date +%b-%d-%y)                    
+    FILENAME="backup-$DirPath-$TIME.tar.gz"    
+    SRCDIR=$CWD                               
+    read -p "Enter the destination folder for backup (default: current directory): " DESDIR
+    DESDIR=${DESDIR:-$CWD}                     
 
-if [ $reply == "y" ] || [ $reply == "Y" ]; then
+    if [ ! -d "$DESDIR" ]; then              
+        echo "Error: Destination directory does not exist."
+        exit 1
+    fi
 
-
-TIME=`date +%b-%d-%y`                         # This Command will read the date.
-FILENAME=backup-$DirPath-$TIME.tar.gz         # The filename including the date.
-SRCDIR=$CWD                                   # Source backup folder.
-DESDIR=$CWD                                   # Destination of backup file.
-touch $FILENAME                               # Create file to avoid warning of file changes.
-tar --exclude=$FILENAME -zcvf $DESDIR/$FILENAME $SRCDIR
+    echo "Creating backup of $SRCDIR to $DESDIR/$FILENAME..."
+    
+    tar --exclude="$FILENAME" -zcvf "$DESDIR/$FILENAME" "$SRCDIR"
+   
+    if [ $? -eq 0 ]; then
+        echo "Backup created successfully at $DESDIR/$FILENAME"
+    else
+        echo "Error occurred during backup."
+    fi
 else
-echo " bye..."
-fi 
+    echo "Bye..."
+fi
